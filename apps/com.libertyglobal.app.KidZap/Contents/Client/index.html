@@ -1,0 +1,371 @@
+<!doctype html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
+	<script src="maf-room.min.js"></script>
+	<style>
+	* {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+		font-family: "Arial";
+	}
+	.container {
+		background-color: #ff0000;
+		width: 1024px;
+		height: 768px;
+		background-image: radial-gradient(ellipse at center, #F08C29 0%, #e76033 100%);
+	}
+	#container_parents {
+		display: none;
+	}
+	#container_kids {
+		display: block;
+		overflow: scroll;
+	}
+	.show {
+		display: inline-block;
+		width: 360px;
+		height: 520px;
+	}
+	.picture {
+		width: 360px;
+		height: 520px;
+		background-size: cover;
+		background-color: #bbb;
+	}
+	.picture.selected {
+		border: 8px solid #ff0;
+	}
+	#strip {
+		margin-top: 20px;
+		height: 520px;
+		width: 15000px;
+	}
+	#parents {
+		width: 107px;
+		height: 107px;
+		display: inline-block;
+		background-image: url("../Images/settings2.png");
+	}
+	#timer {
+		width: 107px;
+		height: 107px;
+		display: inline-block;
+		background-color: yellow;
+	}
+	#parents_side_menu {
+		width: 198px;
+		height: 768px;
+		background-color: black;
+		display: inline-block;
+		vertical-align: top;
+	}
+	#parents_profile_menu {
+		width: 246px;
+		height: 768px;
+		background-color: #bf512e;
+		display: inline-block;
+		vertical-align: top;
+	}
+	#parents_inner {
+		width: 580px;
+		height: 768px;
+		display: inline-block;
+		background-color: #e76033;
+	}
+	.option {
+		font-size: 30px;
+		font-weight: bold;
+		color: white;
+		line-height: 65px;
+		padding-left: 20px;
+	}
+	#option_profiles {
+		width: 198px;
+		height: 65px;
+		background-color: #383838;
+	}
+	#option_default {
+		width: 246px;
+		height: 65px;
+		background-color: #e76033;
+	}
+	.inner_heading {
+		font-size: 30px;
+		font-weight: bold;
+		color: white;
+		line-height: 65px;
+		height: 65px;
+		margin-left: 45px;
+	}
+	.inner_updown {
+		font-size: 90px;
+		font-weight: bold;
+		color: white;
+		line-height: 150px;
+		height: 150px;
+		width: 150px;
+		text-align: center;
+		background-color: #bf512e;
+		display: inline-block;
+		vertical-align: top;
+	}
+	.inner_labels {
+		width: 190px;
+		height: 150px;
+		display: inline-block;
+	}
+	.inner_label {
+		width: 190px;
+		font-size: 70px;
+		font-weight: bold;
+		line-height: 100px;
+		color: white;
+		text-align: center;
+		vertical-align: top;
+	}
+	.inner_sublabel {
+		width: 190px;
+		font-size: 30px;
+		font-weight: bold;
+		line-height: 40px;
+		color: white;
+		text-align: center;
+		vertical-align: top;
+	}
+	#time_down {
+		margin-left: 45px;
+	}
+	#age_down {
+		margin-left: 45px;
+	}
+	.inner_spacer {
+		height: 20px;
+	}
+	</style>
+</head>
+<body>
+	<div class="container" id="container_parents">
+		<div id="parents_side_menu">
+			<div class="option" id="option_profiles">Profiles</div>
+			<div class="option" id="option_terms">Terms</div>
+			<div class="option" id="option_for_kids">For kids</div>
+		</div><div id="parents_profile_menu">
+			<div class="option" id="option_default">Default</div>
+		</div><div id="parents_inner">
+			<div class="inner_heading">
+				Time per day
+			</div>
+			<div class="inner_updown" id="time_down">-</div>
+			<div class="inner_labels">
+				<div class="inner_label" id="time">30</div>
+				<div class="inner_sublabel">minutes</div>
+			</div>
+			<div class="inner_updown" id="time_up">+</div>
+
+			<div class="inner_spacer"></div>
+
+			<div class="inner_heading">
+				Age rating
+			</div>
+			<div class="inner_updown" id="age_down">-</div>
+			<div class="inner_labels">
+				<div class="inner_label" id="age">ALL</div>
+				<div class="inner_sublabel">age</div>
+			</div>
+			<div class="inner_updown" id="age_up">+</div>
+
+		</div>
+	</div>
+	<div class="container" id="container_main">
+		<div id="parents"></div>
+		<div id="timer"></div>
+		<div id="strip">
+			<div class="show">
+				<div id="picture_0" class="picture selected"></div>
+			</div>
+			<div class="show">
+				<div id="picture_1" class="picture"></div>
+			</div>
+			<div class="show">
+				<div id="picture_2" class="picture"></div>
+			</div>
+			<div class="show">
+				<div id="picture_3" class="picture"></div>
+			</div>
+			<div class="show">
+				<div id="picture_4" class="picture"></div>
+			</div>
+			<div class="show">
+				<div id="picture_5" class="picture"></div>
+			</div>
+			<div class="show">
+				<div id="picture_6" class="picture"></div>
+			</div>
+			<div class="show">
+				<div id="picture_7" class="picture"></div>
+			</div>
+			<div class="show">
+				<div id="picture_8" class="picture"></div>
+			</div>
+			<div class="show">
+				<div id="picture_9" class="picture"></div>
+			</div>
+		</div>
+	</div>
+</body>
+	<script>
+	var log = function(str) {
+		document.write(str);
+	};
+
+	(function () {
+		var enabled = false,
+			room = new MAF.Room();
+
+		var pictures = document.getElementsByClassName("picture");
+		var strip = document.getElementById("strip");
+		var parentsBtn = document.getElementById("parents");
+		var kidsBtn = document.getElementById("option_for_kids");
+		var parentsContainer = document.getElementById("container_parents");
+		var mainContainer = document.getElementById("container_main");
+		var timeDown = document.getElementById("time_down");
+		var timeUp = document.getElementById("time_up");
+		var time = document.getElementById("time");
+		var ageDown = document.getElementById("age_down");
+		var ageUp = document.getElementById("age_up");
+		var age = document.getElementById("age");
+		var timer = document.getElementById("timer");
+
+		var addClickListener = function(el, fn) {
+			if (el.addEventListener) {
+				el.addEventListener("click", fn, false);
+			} else {
+				el.attachEvent('onclick', fn);
+			}  
+		};
+
+		var globalTimer = 0; // in ms
+		var globalTimerStarted = false;
+
+		var updateGlobalTimer = function() {
+			timer.innerHTML = parseInt(globalTimer/(1000*60)) + " minutes left";
+			globalTimer -= 1000;
+			if(globalTimer <= 0) {
+				//TODO: show "times up!" screen (and exit app)
+			}
+		};
+
+		var maybeStartGlobalTimer = function() {
+			if(!globalTimerStarted) {
+				globalTimerStarted = true;
+				setInterval(updateGlobalTimer, 1000);
+			}
+		};		
+
+		var handleClick = function(e) {
+			if(e.target && e.target.id) {
+	//			console.log(e.target.id);
+				Array.prototype.forEach.call(pictures, function(el) {
+					el.classList.remove("selected");
+				});
+				e.target.classList.add("selected");
+				var channelRef = e.target["data-channel-ref"];
+//				log(channelRef);
+				room.send({command: "changeChannel", ref: channelRef});
+
+				maybeStartGlobalTimer();
+			}
+		};
+
+		addClickListener(strip, handleClick);
+		addClickListener(parentsBtn, function() {
+			mainContainer.style["display"] = "none";
+			parentsContainer.style["display"] = "block";
+		});
+		addClickListener(kidsBtn, function() {
+			mainContainer.style["display"] = "block";
+			parentsContainer.style["display"] = "none";
+		});
+
+		var changeTime = function(increment) {
+			var currentTime = time.innerHTML;
+			var nextTime = parseInt(currentTime) + increment;
+			time.innerHTML = nextTime;
+
+			room.send({command: "changeSetting", name: "KidZap.Time", value: nextTime});
+		};
+
+		var ageRatings = [
+			"ALL",
+			"6+",
+			"9+",
+			"12+"
+		];
+
+		var changeAge = function(increment) {
+			var currentAge = age.innerHTML;
+			var idx = 0;
+			ageRatings.forEach(function(a,i) { if(a === currentAge) idx=i; });
+			idx += increment;
+			if(idx >= ageRatings.length) idx = ageRatings.length-1;
+			else if(idx < 0) idx = 0;
+
+			var nextAge = ageRatings[idx];
+			age.innerHTML = nextAge;
+
+			room.send({command: "changeSetting", name: "KidZap.Age", value: nextAge});
+		};
+
+		addClickListener(timeDown, changeTime.bind(null, -5));
+		addClickListener(timeUp, changeTime.bind(null, 5));
+		addClickListener(ageDown, changeAge.bind(null, -1));
+		addClickListener(ageUp, changeAge.bind(null, 1));
+
+		room.addEventListener('joined', function (event) {
+			// A client has joined - us!?
+			//log('user joined, asking for guide');
+			room.send({command: "getGuide"});
+		});
+
+		room.addEventListener('data', function (event) {
+			var d = event.data;
+			//log("Got data: "+d.data.length);
+			var i = 0;
+			if(!d || !d.data) return;
+
+			d.data.forEach(function(item) {
+				var image = item.video.imageLink.href;
+				var synopsis = item.video.synopsis;
+				if(pictures[i] && synopsis.indexOf("Kinderprogramma.") === -1) {
+					pictures[i].style["background-image"] = "url(" + image + ")";
+					pictures[i]["data-channel-ref"] = item.channel.logicalPosition; //hope this works!
+					i++;
+				}
+			});
+			if(d.settings && d.settings.time) {
+				time.innerHTML = d.settings.time;
+				globalTimer = d.settings.time*(60*1000);
+				console.log(globalTimer);
+			}
+			if(d.settings && d.settings.age) {
+				age.innerHTML = d.settings.age;
+			}
+		});
+
+		window.addEventListener('unload', function (event) {
+			room.destroy();
+			room = null;
+		}, false);
+
+		function start(x, y) {
+			enabled = true;
+		}
+		function end(x, y) {
+			enabled = false;
+		}
+
+	}());
+	</script>
+</html>

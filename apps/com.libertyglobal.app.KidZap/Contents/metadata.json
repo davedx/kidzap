@@ -1,0 +1,19 @@
+{
+	"identifier": "com.libertyglobal.app.KidZap",
+	"name": "Kid Zap",
+	"version": "0.0.1",
+	"author": "Cellular",
+	"company": "Cellular",
+	"copyright": "",
+	"description": "Kid Zap",
+	"categories": [
+		"video"
+	],
+	"scripts": "Javascript/init.js",
+	"images": {
+		"about": "Images/Icon.png",
+		"icon": {
+			"192x192": "Images/Icon.png"
+		}
+	}
+}
