@@ -355,6 +355,11 @@
 		var pinField = document.getElementById("pin_field");
 		var pinContainer = document.getElementById("container_blackout");
 
+		var sendData = function(payload) {
+			payload.timestamp = Date.now();
+			room.send(payload);
+		};
+
 		var addClickListener = function(el, fn) {
 			if (el.addEventListener) {
 				el.addEventListener("click", fn, false);
@@ -373,7 +378,7 @@
 			//console.log(globalTimer);
 			if(globalTimer <= 0) {
 				//TODO: show "times up!" screen (and exit app)
-				room.send({command: "timeisup"});
+				sendData({command: "timeisup"});
 				clearInterval(globalTimerId);
 				timer.innerHTML = "";
 			}
@@ -410,7 +415,7 @@
 				e.target.classList.add("selected");
 				var channelRef = e.target["data-channel-ref"];
 //				log(channelRef);
-				room.send({command: "changeChannel", ref: channelRef});
+				sendData({command: "changeChannel", ref: channelRef});
 
 				maybeStartGlobalTimer();
 			}
@@ -447,7 +452,7 @@
 			var nextTime = parseInt(currentTime) + increment;
 			time.innerHTML = nextTime;
 
-			room.send({command: "changeSetting", name: "KidZap.Time", value: nextTime});
+			sendData({command: "changeSetting", name: "KidZap.Time", value: nextTime});
 		};
 
 		var ageRatings = [
@@ -468,7 +473,7 @@
 			var nextAge = ageRatings[idx];
 			age.innerHTML = nextAge;
 
-			room.send({command: "changeSetting", name: "KidZap.Age", value: nextAge});
+			sendData({command: "changeSetting", name: "KidZap.Age", value: nextAge});
 		};
 
 		addClickListener(timeDown, changeTime.bind(null, -5));
@@ -476,23 +481,30 @@
 		addClickListener(ageDown, changeAge.bind(null, -1));
 		addClickListener(ageUp, changeAge.bind(null, 1));
 
+		var sentDataLoadCommand = false;
 		room.addEventListener('joined', function (event) {
 			// A client has joined - us!?
 			// probably not the best approach but it works
 			//log('user joined, asking for guide');
-			room.send({command: "getGuide"});
+			if(!sentDataLoadCommand) {
+				sendData({command: "getGuide"});
+				sentDataLoadCommand = true;
+			}
 			//room.send({command: "getProfiles"}); //for now we are not using this
 		});
 
 		room.addEventListener('data', function (event) {
+			//console.log("Data: ", event);
 			var d = event.data;
 			//log("Got data: "+d.data.length);
 			var i = 0;
 
 			if(!d || !d.data) return;
 
-			if(d.command === "getGuide"){
-				d.data.forEach(function(item) {
+			if(d.sent_command === "getGuide") {
+				console.log("Loading guide: ", d);
+				for(var j=0; j<d.data.length; j++) {
+					var item = d.data[j];
 					var image = item.video.imageLink.href;
 					var synopsis = item.video.synopsis;
 					if(pictures[i] && synopsis.indexOf("Kinderprogramma.") === -1) {
@@ -500,7 +512,7 @@
 						pictures[i]["data-channel-ref"] = item.channel.logicalPosition; // this works!
 						i++;
 					}
-				});
+				}
 				if(d.settings && d.settings.time) {
 					time.innerHTML = d.settings.time;
 					if(!globalTimerStarted){

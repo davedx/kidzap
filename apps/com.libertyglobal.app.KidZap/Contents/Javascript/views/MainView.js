@@ -4,7 +4,6 @@ var MainView = new MAF.Class({
 	Extends: MAF.system.FullscreenView,
 
 	data: [],
-	channels: [],
 	globalTimer: 0,
 
 	initialize: function () {
@@ -12,7 +11,7 @@ var MainView = new MAF.Class({
 
 		// try get some data from Kraken
 		var onBroadcastsReceived = function(data) {
-			console.log(data);
+			console.log("Received: ", data);
 			this.data = data;
 		}.bind(this);
 
@@ -115,13 +114,18 @@ var MainView = new MAF.Class({
 
 		(function (event) {
 			var onData = function(data) {
+				//log("onData: ", data);
+				if(!data.timestamp) return;
+				var timestamp = data.timestamp;
+				if(Date.now() - timestamp > 10000) return;
+
 				switch(data.command) {
 					case "getGuide":
 						var settings = {
 							age: currentAppConfig.get("KidZap.Age"),
 							time: currentAppConfig.get("KidZap.Time")
 						};
-						var payload = {command: data.command, data: view.data, settings: settings};
+						var payload = {sent_command: data.command, data: view.data, settings: settings};
 						log("Sending data: ", payload);
 						room.send(payload);
 						break;
@@ -199,6 +203,9 @@ var MainView = new MAF.Class({
 			view.room.leave(); // Leave room, will trigger an onLeaved of the app user
 			view.room.destroy(); // Destroy the room
 			delete view.room; // Unreference from view for GC
-		}		
+		}
+		if(this.data) {
+			delete this.data;
+		}
 	}
 });
