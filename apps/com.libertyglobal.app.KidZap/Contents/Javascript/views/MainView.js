@@ -112,6 +112,24 @@ var MainView = new MAF.Class({
 			}
 		}).appendTo(timeupContianer);
 
+		var exitButton = new MAF.control.TextButton({
+			styles: {
+				width: 500,
+				height: 100,
+				vOffset: 850,
+				hOffset: 650,
+				fontSize: 50,
+				backgroundColor: "#772211"
+			},
+			theme: false,
+			label: "EXIT",
+			events: {
+				onSelect: function() {
+					MAF.application.exit();
+				}
+			}
+		}).appendTo(timeupContianer);
+
 		(function (event) {
 			var onData = function(data) {
 				//log("onData: ", data);

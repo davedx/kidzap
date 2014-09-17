@@ -4,6 +4,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
 	<script src="maf-room.min.js"></script>
 	<script src="jquery-2.1.1.min.js"></script>
+	<script src="lgi-guide.min.js"></script>
 	<script src="piechart.js"></script>
 	<style>
 	* {
@@ -369,6 +370,7 @@
 		};
 
 		var globalTimer = 0; // in ms
+		var globalTimerSaved = 0;
 		var globalTimerStarted = false;
 		var globalTimerId;
 
@@ -387,6 +389,7 @@
 		var maybeStartGlobalTimer = function() {
 			if(!globalTimerStarted) {
 				globalTimerStarted = true;
+				globalTimer = globalTimerSaved;
 				globalTimerId = setInterval(updateGlobalTimer, 1000);
 			}
 
@@ -503,21 +506,49 @@
 
 			if(d.sent_command === "getGuide") {
 				console.log("Loading guide: ", d);
-				for(var j=0; j<d.data.length; j++) {
-					var item = d.data[j];
-					var image = item.video.imageLink.href;
-					var synopsis = item.video.synopsis;
-					if(pictures[i] && synopsis.indexOf("Kinderprogramma.") === -1) {
-						pictures[i].style["background-image"] = "url(" + image + ")";
-						pictures[i]["data-channel-ref"] = item.channel.logicalPosition; // this works!
-						i++;
+				/////arrghhhh
+				LGI.Guide.config.region = 'NL';
+
+
+				var onBroadcastsReceived = function(data) {
+					console.log("Received from KRAKEN: ", data);
+
+					for(var j=0; j<data.length; j++) {
+						var item = data[j];
+						var image = item.video.imageLink.href;
+						var synopsis = item.video.synopsis;
+						if(pictures[i] && synopsis.indexOf("Kinderprogramma.") === -1) {
+							pictures[i].style["background-image"] = "url(" + image + ")";
+							pictures[i]["data-channel-ref"] = item.channel.logicalPosition; // this works!
+							i++;
+						}
 					}
-				}
+
+				}.bind(this);
+
+				var nowDate = new Date().toISOString();
+				nowDate = nowDate.substr(0, nowDate.lastIndexOf(':')) + 'Z';
+
+				LGI.Guide.Broadcast.create()
+								.limit(20)
+								.fields(
+										LGI.Guide.Broadcast.ID,
+										LGI.Guide.Broadcast.TITLE,
+										LGI.Guide.Broadcast.START,
+										LGI.Guide.Broadcast.END,
+										LGI.Guide.Broadcast.IMAGE_LINK,
+										LGI.Guide.Broadcast.AGE_RATING,
+										LGI.Guide.Broadcast.CHANNEL_NAME,
+										"channel.ref",
+										"channel.logicalPosition",
+										LGI.Guide.Broadcast.SYNOPSIS)
+								.filter(LGI.Guide.Broadcast.START.greaterThan(nowDate))
+								.filter(LGI.Guide.Broadcast.CATEGORY.equalTo('kids'))
+								.findOne(onBroadcastsReceived);
+
 				if(d.settings && d.settings.time) {
 					time.innerHTML = d.settings.time;
-					if(!globalTimerStarted){
-						globalTimer = d.settings.time*(60*1000);
-					}
+					globalTimerSaved = d.settings.time*(60*1000);
 					//console.log(globalTimer);
 				}
 				if(d.settings && d.settings.age) {
