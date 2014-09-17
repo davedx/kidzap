@@ -1,7 +1,7 @@
 var MainView = new MAF.Class({
 	ClassName: 'MainView',
 
-	Extends: MAF.system.SidebarView,
+	Extends: MAF.system.FullscreenView,
 
 	data: [],
 	channels: [],
@@ -39,6 +39,8 @@ var MainView = new MAF.Class({
 		var view = this;
 		view.room = new MAF.PrivateRoom(view.ClassName);
 
+		currentAppConfig.set("profiles", [{name: "thomas", active: true},{name: "linda", active: false}]);
+
 		MAF.mediaplayer.init();
 	},
 
@@ -48,15 +50,68 @@ var MainView = new MAF.Class({
 			clients = {}; // Keep track of the clients connected
 
 		// Create a placeholder for the QRCode image
+		// var backgroundimage = new MAF.element.Image({
+		// 	styles: {
+		// 		width: view.width,
+		// 		height: view.height
+		// 	},
+		// 	source: "Images/qrbackground.png"
+		// }).appendTo(view);
+
 		var qrcode = new MAF.element.Image({
 			styles: {
-				vAlign: 'top',
-				vOffset: 10,
-				hOffset: 10,
-				width: view.width - 20,
-				height: view.width - 20
+				vOffset: 600,
+				hOffset: 95,
+				width: 400,
+				height: 400
 			}
 		}).appendTo(view);
+
+		var instruction = "1. Scan QR Code with your Smartphone or Tablet" +
+											"<br><br>2. Select settings for your kid(s)" +
+											"<br><br>3. Let your kid(s) only watch what you want them to see";
+		var instructions = new MAF.element.TextField({
+			data: instruction,
+			styles:{
+				width: 800,
+				height: 500,
+				vOffset: 600,
+				hOffset: 600,
+				wrap: true,
+				fontSize: 40
+			}
+		}).appendTo(view);
+
+		var timeupContianer = new MAF.element.Container({
+			styles:{
+				width: view.width,
+				height: view.height,
+				backgroundColor: "#bf512e"
+			}
+		}).appendTo(view);
+		timeupContianer.hide();
+
+		var timeup = new MAF.element.Image({
+			source: "Images/logo_big.png",
+			styles: {
+				vOffset: 248,
+				hOffset: 532,
+				width: 892,
+				height: 420
+			}
+		}).appendTo(timeupContianer);
+
+		var timeuptext = new MAF.element.TextField({
+			data: "Your TV time is up!",
+			styles:{
+				width: 1200,
+				height: 500,
+				vOffset: 700,
+				hOffset: 580,
+				wrap: true,
+				fontSize: 80
+			}
+		}).appendTo(timeupContianer);
 
 		(function (event) {
 			var onData = function(data) {
@@ -66,13 +121,22 @@ var MainView = new MAF.Class({
 							age: currentAppConfig.get("KidZap.Age"),
 							time: currentAppConfig.get("KidZap.Time")
 						};
-						var payload = {data: view.data, settings: settings};
+						var payload = {command: data.command, data: view.data, settings: settings};
 						log("Sending data: ", payload);
 						room.send(payload);
+						break;
+					case "getProfiles":
+						log("Getting profiles");
+						//room.send({command: data.command, data: currentAppConfig.get("profiles")});
 						break;
 					case "changeChannel":
 						log("Changing channel to: "+data.ref);
 						MAF.mediaplayer.setChannelByNumber(data.ref);
+						break;
+					case "timeisup":
+						log("Ohhnooo, time is up!");
+						//MAF.mediaplayer.setChannelByNumber(data.ref);
+						timeupContianer.show();
 						break;
 					case "changeSetting":
 						log("Changing setting: ", data);

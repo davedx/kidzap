@@ -3,6 +3,8 @@
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
 	<script src="maf-room.min.js"></script>
+	<script src="jquery-2.1.1.min.js"></script>
+	<script src="piechart.js"></script>
 	<style>
 	* {
 		box-sizing: border-box;
@@ -17,10 +19,10 @@
 		background-image: radial-gradient(ellipse at center, #F08C29 0%, #e76033 100%);
 	}
 	#container_parents {
-		display: none;
+		display: block;
 	}
 	#container_kids {
-		display: block;
+		display: none;
 		overflow: scroll;
 	}
 	.show {
@@ -48,12 +50,7 @@
 		display: inline-block;
 		background-image: url("../Images/settings2.png");
 	}
-	#timer {
-		width: 107px;
-		height: 107px;
-		display: inline-block;
-		background-color: yellow;
-	}
+	
 	#parents_side_menu {
 		width: 198px;
 		height: 768px;
@@ -90,6 +87,11 @@
 		width: 246px;
 		height: 65px;
 		background-color: #e76033;
+	}
+	#option_inactive {
+		width: 246px;
+		height: 65px;
+		background-color: #bf512e;
 	}
 	.inner_heading {
 		font-size: 30px;
@@ -143,6 +145,111 @@
 	.inner_spacer {
 		height: 20px;
 	}
+	#container_blackout {
+		display: none;
+		position: absolute;
+		top: 0; left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0, 0, 0, 0.5);
+	}
+	#pin_entry {
+		display: block;
+		position: fixed;
+		top: 35%;
+		left: 25%;
+		width: 50%;
+		height: 30%;
+		background-color: black;
+		color: white;
+		font-size: 20px;
+		font-weight: bold;
+	}
+	#pin_entry h3 {
+		margin-top: 5%;
+		margin-left: 5%;
+	}
+	#pin_field {
+		margin-top: 5%;
+		margin-left: 5%;
+		width: 90%;
+		height: 20%;
+		border: 4px solid white;
+		font-size: 20px;
+		font-weight: bold;
+		line-height: 100%;
+	}
+	#setpin{
+		width: 190px;
+		font-size: 30px;
+		font-weight: bold;
+		line-height: 40px;
+		color: white;
+		text-align: center;
+		vertical-align: top;
+		margin-top: 40px;
+		margin-left: 40px;
+		background-color: #bf512e;
+	}
+	#timer2{
+		width: 100px;
+		left: 900px;
+		position: absolute;
+		top: 60px;
+		text-align: center;
+	}
+	.pietimer {
+	    position:absolute;
+	    font-size: 200px;
+	    width:100px;
+	    height:100px;
+	    left: 900px;
+	    top: 20px;
+	}
+	.pietimer > .percent {
+	    position: absolute;
+	    top: 1.05em;
+	    left: 0;
+	    width: 3.33em;
+	    font-size: 0.3em;
+	    text-align:center;
+	    display: none;
+	}
+	.pietimer > .slice {
+	    position:absolute;
+	    width:1em;
+	    height:1em;
+	    clip:rect(0px,1em,1em,0.5em);
+	}
+	.pietimer > .slice.gt50 {
+	    clip:rect(auto, auto, auto, auto);
+	}
+	.pietimer > .slice > .pie {
+	    border: 0.1em solid #c0c0c0;
+	    position:absolute;
+	    width:0.8em; /* 1 - (2 * border width) */
+	    height:0.8em; /* 1 - (2 * border width) */
+	    clip:rect(0em,0.5em,1em,0em);
+	    -moz-border-radius:0.5em;
+	    -webkit-border-radius:0.5em;
+	    border-radius:0.5em;
+	}
+	.pietimer > .slice > .pie.fill {
+	    -moz-transform:rotate(180deg) !important;
+	    -webkit-transform:rotate(180deg) !important;
+	    -o-transform:rotate(180deg) !important;
+	    transform:rotate(180deg) !important;
+	}
+	.pietimer.fill > .percent {
+	    display: none;
+	}
+	.pietimer.fill > .slice > .pie {
+	    border: transparent;
+	    background-color: #c0c0c0;
+	    width:1em;
+	    height:1em;
+	}
+
 	</style>
 </head>
 <body>
@@ -175,12 +282,13 @@
 				<div class="inner_sublabel">age</div>
 			</div>
 			<div class="inner_updown" id="age_up">+</div>
-
+			<div id="setpin">SET PIN</div>
 		</div>
 	</div>
 	<div class="container" id="container_main">
 		<div id="parents"></div>
 		<div id="timer"></div>
+		<div id="timer2"></div>
 		<div id="strip">
 			<div class="show">
 				<div id="picture_0" class="picture selected"></div>
@@ -214,6 +322,12 @@
 			</div>
 		</div>
 	</div>
+	<div id="container_blackout">
+			<div id="pin_entry">
+				<h3>Enter pin:</h3>
+				<input type="number" maxlength="4" id="pin_field">
+			</div>
+		</div>
 </body>
 	<script>
 	var log = function(str) {
@@ -236,7 +350,10 @@
 		var ageDown = document.getElementById("age_down");
 		var ageUp = document.getElementById("age_up");
 		var age = document.getElementById("age");
-		var timer = document.getElementById("timer");
+		var timer = document.getElementById("timer2");
+		var parentsProfiles = document.getElementById("parents_profile_menu");
+		var pinField = document.getElementById("pin_field");
+		var pinContainer = document.getElementById("container_blackout");
 
 		var addClickListener = function(el, fn) {
 			if (el.addEventListener) {
@@ -248,21 +365,41 @@
 
 		var globalTimer = 0; // in ms
 		var globalTimerStarted = false;
+		var globalTimerId;
 
 		var updateGlobalTimer = function() {
-			timer.innerHTML = parseInt(globalTimer/(1000*60)) + " minutes left";
+			timer.innerHTML = Math.ceil(globalTimer/(1000*60)) + " minutes left";
 			globalTimer -= 1000;
+			//console.log(globalTimer);
 			if(globalTimer <= 0) {
 				//TODO: show "times up!" screen (and exit app)
+				room.send({command: "timeisup"});
+				clearInterval(globalTimerId);
+				timer.innerHTML = "";
 			}
 		};
 
 		var maybeStartGlobalTimer = function() {
 			if(!globalTimerStarted) {
 				globalTimerStarted = true;
-				setInterval(updateGlobalTimer, 1000);
+				globalTimerId = setInterval(updateGlobalTimer, 1000);
 			}
+
+			$(function() {
+		    var pt = $('#timer').pietimer({
+		        timerSeconds: globalTimer/1000,
+		        color: '#fff',
+		        fill: '#bf512e',
+		        showPercentage: false,
+		        callback: function() {
+		            // alert("yahoo, timer is done!");
+		            $('#timer').pietimer('reset');
+		        }
+		    });
+			});
 		};		
+
+	
 
 		var handleClick = function(e) {
 			if(e.target && e.target.id) {
@@ -288,6 +425,22 @@
 			mainContainer.style["display"] = "block";
 			parentsContainer.style["display"] = "none";
 		});
+
+		var pinCheck = function(){
+			if(pinField.value == "1234"){
+				pinContainer.style["display"] = "none";
+			}
+			else{
+				pinContainer.style["display"] = "block";	
+			}
+		};
+
+		if(pinField.addEventListener){
+			pinField.addEventListener("change", pinCheck, false);
+		}
+		else{pinField.attachEvent('onchange', pinCheck);}
+	
+		
 
 		var changeTime = function(increment) {
 			var currentTime = time.innerHTML;
@@ -325,33 +478,47 @@
 
 		room.addEventListener('joined', function (event) {
 			// A client has joined - us!?
+			// probably not the best approach but it works
 			//log('user joined, asking for guide');
 			room.send({command: "getGuide"});
+			//room.send({command: "getProfiles"}); //for now we are not using this
 		});
 
 		room.addEventListener('data', function (event) {
 			var d = event.data;
 			//log("Got data: "+d.data.length);
 			var i = 0;
+
 			if(!d || !d.data) return;
 
-			d.data.forEach(function(item) {
-				var image = item.video.imageLink.href;
-				var synopsis = item.video.synopsis;
-				if(pictures[i] && synopsis.indexOf("Kinderprogramma.") === -1) {
-					pictures[i].style["background-image"] = "url(" + image + ")";
-					pictures[i]["data-channel-ref"] = item.channel.logicalPosition; //hope this works!
-					i++;
+			if(d.command === "getGuide"){
+				d.data.forEach(function(item) {
+					var image = item.video.imageLink.href;
+					var synopsis = item.video.synopsis;
+					if(pictures[i] && synopsis.indexOf("Kinderprogramma.") === -1) {
+						pictures[i].style["background-image"] = "url(" + image + ")";
+						pictures[i]["data-channel-ref"] = item.channel.logicalPosition; // this works!
+						i++;
+					}
+				});
+				if(d.settings && d.settings.time) {
+					time.innerHTML = d.settings.time;
+					if(!globalTimerStarted){
+						globalTimer = d.settings.time*(60*1000);
+					}
+					//console.log(globalTimer);
 				}
-			});
-			if(d.settings && d.settings.time) {
-				time.innerHTML = d.settings.time;
-				globalTimer = d.settings.time*(60*1000);
-				console.log(globalTimer);
+				if(d.settings && d.settings.age) {
+					age.innerHTML = d.settings.age;
+				}
 			}
-			if(d.settings && d.settings.age) {
-				age.innerHTML = d.settings.age;
-			}
+			// if(d.command === "getProfiles"){
+			// 	var profilehtml = '';
+			// 	d.data.forEach(function(profile) {
+			// 		profilehtml += '<div class="option" id="'+(profile.active?'option_default':'option_inactive')+'">'+profile.name+'</div>';
+			// 	});
+			// 	parentsProfiles.innerHTML = profilehtml;
+			// }
 		});
 
 		window.addEventListener('unload', function (event) {
@@ -365,6 +532,19 @@
 		function end(x, y) {
 			enabled = false;
 		}
+
+		// $(function() {
+	 //    var pt = $('#timer').pietimer({
+	 //        timerSeconds: 10,
+	 //        color: '#fff',
+	 //        fill: '#bf512e',
+	 //        showPercentage: false,
+	 //        callback: function() {
+	 //            // alert("yahoo, timer is done!");
+	 //            $('#timer').pietimer('reset');
+	 //        }
+	 //    });
+		// });
 
 	}());
 	</script>
