@@ -77,7 +77,8 @@ var MainView = new MAF.Class({
 				vOffset: 600,
 				hOffset: 600,
 				wrap: true,
-				fontSize: 40
+				fontSize: 40,
+				backgroundColor: "rgba(0,0,0,0.3)"
 			}
 		}).appendTo(view);
 
@@ -154,6 +155,8 @@ var MainView = new MAF.Class({
 					case "changeChannel":
 						log("Changing channel to: "+data.ref);
 						MAF.mediaplayer.setChannelByNumber(data.ref);
+						qrcode.hide();
+						instructions.hide();
 						break;
 					case "timeisup":
 						log("Ohhnooo, time is up!");

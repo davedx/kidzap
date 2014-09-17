@@ -5,6 +5,7 @@
 	<script src="maf-room.min.js"></script>
 	<script src="jquery-2.1.1.min.js"></script>
 	<script src="lgi-guide.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min.js"></script>
 	<script src="piechart.js"></script>
 	<style>
 	* {
@@ -529,6 +530,9 @@
 				var nowDate = new Date().toISOString();
 				nowDate = nowDate.substr(0, nowDate.lastIndexOf(':')) + 'Z';
 
+				var nowDatePlusTwoHours = moment().add(2, "hours").toISOString();
+				nowDatePlusTwoHours = nowDatePlusTwoHours.substr(0, nowDatePlusTwoHours.lastIndexOf(':')) + 'Z';
+				
 				LGI.Guide.Broadcast.create()
 								.limit(20)
 								.fields(
@@ -543,6 +547,7 @@
 										"channel.logicalPosition",
 										LGI.Guide.Broadcast.SYNOPSIS)
 								.filter(LGI.Guide.Broadcast.START.greaterThan(nowDate))
+								.filter(LGI.Guide.Broadcast.END.lessThan(nowDatePlusTwoHours))
 								.filter(LGI.Guide.Broadcast.CATEGORY.equalTo('kids'))
 								.findOne(onBroadcastsReceived);
 
